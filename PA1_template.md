@@ -7,13 +7,7 @@ output:
         keep_md: true
 ---
 
-```{r setup, include=FALSE}
-library(lubridate)
-library(dplyr)
-library(ggplot2)
 
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## Introduction
 
@@ -31,7 +25,8 @@ The report is organised in the following sections:
 
 The data can be downloaded from their online repository or, if available, from a local directory. It also creates a `figure` subfolder to store the produced images. 
 
-```{r, echo=TRUE}
+
+```r
 if(!file.exists("./data/activity.csv"))
 {
     link <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
@@ -47,9 +42,14 @@ if(!file.exists("./data/activity.csv"))
 dir.create(file.path('./figures'))
 ```
 
+```
+## Warning in dir.create(file.path("./figures")): '.\figures' already exists
+```
+
 Two further columns are added to the data: a factor variable `day` that removes the year in date (for readibility reasons) and a factor variable `daytype` indicating if the day is a weekday or a weekend.  
 
-```{r, echo=TRUE}
+
+```r
 df.data <- mutate(df.data, 
                   day = factor(sub("2012-", "", df.data$date)),
                   daytype = factor(ifelse(weekdays(as.Date(df.data$date, format = "%Y-%m-%d")) %in% c("Saturday","Sunday"), "weekend", "weekday")))
@@ -57,22 +57,40 @@ df.data <- mutate(df.data,
 knitr::kable(head(df.data))
 ```
 
+
+
+ steps  date          interval  day     daytype 
+------  -----------  ---------  ------  --------
+    NA  2012-10-01           0  10-01   weekday 
+    NA  2012-10-01           5  10-01   weekday 
+    NA  2012-10-01          10  10-01   weekday 
+    NA  2012-10-01          15  10-01   weekday 
+    NA  2012-10-01          20  10-01   weekday 
+    NA  2012-10-01          25  10-01   weekday 
+
 ## What is mean total number of steps taken per day
 
 The following is the plot of the histogram of the total number of steps taken each day
 
-```{r, echo=TRUE, message=FALSE}
+
+```r
 df.data %>%
     group_by(date) %>%
     summarise(sum_step = sum(steps, na.rm = TRUE)) %>%
     ggplot(aes(x = sum_step)) +
         geom_histogram(color = "black", fill = "red")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
     ggsave("./figures/sum_hist.png")
 ```
 
 The mean and median of the total number of steps taken each day.
 
-```{r, echo=TRUE, message=FALSE}
+
+```r
 stepsum <- df.data %>% 
     group_by(date) %>%
     summarise(ssum = sum(steps, na.rm = TRUE))
@@ -81,13 +99,14 @@ mean.steps <- round(mean(stepsum$ssum),2)
 median.steps <- median(stepsum$ssum)
 ```
 
-- the mean is `mean.steps`: `r mean.steps` 
-- the median is `median.steps`: `r median.steps`
+- the mean is `mean.steps`: 9354.23 
+- the median is `median.steps`: 10395
 
 # What is the average daily activity pattern
 
 - time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
-```{r, echo=TRUE, message=FALSE}
+
+```r
 stepaverage <- df.data %>% 
     group_by(interval) %>%
     summarise(average = mean(steps, na.rm = TRUE))
@@ -95,29 +114,35 @@ stepaverage <- df.data %>%
 ggplot(stepaverage, aes(interval, average)) +
     geom_line(color = "darkblue") +
     geom_point(shape = 'o')
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+```r
 ggsave("./figures/stepaverage.png")
 
 misteps <- stepaverage[stepaverage$average == max(stepaverage$average),]$interval
 ```
 
-- the five minute interval that, on average, contains the maximum number of steps is `misteps` = `r misteps` 
+- the five minute interval that, on average, contains the maximum number of steps is `misteps` = 835 
 
 
 ## Imputing missing values
 
 The total number of missing values is calculated with:
 
-```{r, echo=TRUE}
+
+```r
 n.missing <- sum(is.na(df.data))
 ```
 
-- `n.missing` = `r n.missing`
+- `n.missing` = 2304
 
 The strategy chosen for imputing missing variables is by considering the mean of the 5-mins intervals during the recorded 2 months and replace the missing value. `stepsumimp` is the new dataset, equal to the original used so far, that contains the new information.
 
 
-```{r}
+
+```r
 impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 
 stepsumimp <- df.data %>%
@@ -129,15 +154,31 @@ stepsumimp <- df.data %>%
 knitr::kable(head(stepsumimp))
 ```
 
+
+
+ steps  date          interval  day     daytype    imputedsteps
+------  -----------  ---------  ------  --------  -------------
+    NA  2012-10-01           0  10-01   weekday       1.7169811
+    NA  2012-10-01           5  10-01   weekday       0.3396226
+    NA  2012-10-01          10  10-01   weekday       0.1320755
+    NA  2012-10-01          15  10-01   weekday       0.1509434
+    NA  2012-10-01          20  10-01   weekday       0.0754717
+    NA  2012-10-01          25  10-01   weekday       2.0943396
+
 The histogram of the total number of steps taken each day after the missing values are imputed is the following:
 
-```{r, message=FALSE}
+
+```r
 stepsumimp %>%
     group_by(date) %>%
     summarise(sum_step_imp = sum(imputedsteps, na.rm = TRUE)) %>%
     ggplot(aes(x = sum_step_imp)) +
     geom_histogram(color = "black", fill = "red")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+```r
 ggsave("./figures/sum_hist_imp.png")
 ```
 
@@ -145,7 +186,8 @@ ggsave("./figures/sum_hist_imp.png")
 
 A panel plot comparing the average number of steps per each interval across weekdays and weekends is produced with the following code:
 
-```{r,message=FALSE}
+
+```r
 dailypattern <- df.data %>%
     group_by(interval, daytype) %>%
     summarise(intervalav = mean(steps, na.rm = TRUE))
@@ -153,7 +195,11 @@ dailypattern <- df.data %>%
 ggplot(dailypattern, aes(interval, intervalav)) +
     geom_line(color = "dodgerblue2") +
     facet_wrap(~daytype, ncol = 1)
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
+```r
 ggsave("./figures/dailypattern.png")
 ```
 
