@@ -66,7 +66,8 @@ df.data %>%
     group_by(date) %>%
     summarise(sum_step = sum(steps, na.rm = TRUE)) %>%
     ggplot(aes(x = sum_step)) +
-        geom_histogram(color = "black", fill = "red")
+        geom_histogram(color = "black", fill = "red") +
+        xlab("Steps Sum") + ylab("Count")
     ggsave("./figures/sum_hist.png")
 ```
 
@@ -136,7 +137,8 @@ stepsumimp %>%
     group_by(date) %>%
     summarise(sum_step_imp = sum(imputedsteps, na.rm = TRUE)) %>%
     ggplot(aes(x = sum_step_imp)) +
-    geom_histogram(color = "black", fill = "red")
+    geom_histogram(color = "black", fill = "red") +
+    xlab("Steps sum with imputed values") + ylab("Count")
 
 ggsave("./figures/sum_hist_imp.png")
 ```
@@ -152,7 +154,8 @@ dailypattern <- df.data %>%
 
 ggplot(dailypattern, aes(interval, intervalav)) +
     geom_line(color = "dodgerblue2") +
-    facet_wrap(~daytype, ncol = 1)
+    facet_wrap(~daytype, ncol = 1) +
+    xlab("Interval") + ylab("Steps mean")
 
 ggsave("./figures/dailypattern.png")
 ```
