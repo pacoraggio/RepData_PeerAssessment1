@@ -78,7 +78,8 @@ df.data %>%
     group_by(date) %>%
     summarise(sum_step = sum(steps, na.rm = TRUE)) %>%
     ggplot(aes(x = sum_step)) +
-        geom_histogram(color = "black", fill = "red")
+        geom_histogram(color = "black", fill = "red") +
+        xlab("Steps Sum") + ylab("Count")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
@@ -173,7 +174,8 @@ stepsumimp %>%
     group_by(date) %>%
     summarise(sum_step_imp = sum(imputedsteps, na.rm = TRUE)) %>%
     ggplot(aes(x = sum_step_imp)) +
-    geom_histogram(color = "black", fill = "red")
+    geom_histogram(color = "black", fill = "red") +
+    xlab("Steps sum with imputed values") + ylab("Count")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
@@ -194,7 +196,8 @@ dailypattern <- df.data %>%
 
 ggplot(dailypattern, aes(interval, intervalav)) +
     geom_line(color = "dodgerblue2") +
-    facet_wrap(~daytype, ncol = 1)
+    facet_wrap(~daytype, ncol = 1) +
+    xlab("Interval") + ylab("Steps mean")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
